@@ -1,48 +1,44 @@
 name: build
-on: [workflow_dispatch] # 버튼을 눌러서 수동으로 빌드 시작
+on: [workflow_dispatch]
 
 jobs:
   build:
-    runs-on: windows-latest # 윈도우 서버를 빌려서 사용
+    runs-on: windows-latest
+
     steps:
     - uses: actions/checkout@v4
       with:
         submodules: 'recursive'
-        
+
     - name: Install Dependencies
       run: |
         choco install ninja
-        
+
     - name: Download Skia
-      shell: powershell
-      run: |
-        # 최신 안정화된 Skia 링크 사용
-        $url = "https://github.com/aseprite/skia/releases/download/m124-08a5439a6b/Skia-Windows-Release-x64.zip"
-        Write-Host "Downloading Skia from $url"
-        try {
-            Invoke-WebRequest -Uri $url -OutFile skia.zip -UserAgent "NativeHost"
-            Write-Host "Download complete. Extracting..."
-            Expand-Archive -Path skia.zip -DestinationPath skia -Force
-        } catch {
-            Write-Error "Download failed. Please check the URL."
-            exit 1
-        }
-        
-    - name: Configuring CMake
       shell: pwsh
       run: |
-        mkdir build
-        cd build
-        # 모든 경로를 한 줄로 이어 붙여서 경로 유실 방지
-        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DLAF_BACKEND=skia -DSKIA_DIR="$pwd/../skia" -DSKIA_LIBRARY_DIR="$pwd/../skia/out/Release-x64" -DSKIA_LIBRARY="$pwd/../skia/out/Release-x64/skia.lib" ..
-        
-    - name: Compiling
+        $url = "https://github.com/aseprite/skia/releases/download/m124-08a5439a6b/Skia-Windows-Release-x64.zip"
+        Invoke-WebRequest -Uri $url -OutFile skia.zip -UserAgent "NativeHost"
+        Expand-Archive -Path skia.zip -DestinationPath skia -Force
+
+    - name: Configure & Build (MSVC)
       shell: cmd
       run: |
         call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=x64
+
+        mkdir build
         cd build
+
+        cmake -G Ninja ^
+          -DCMAKE_BUILD_TYPE=Release ^
+          -DLAF_BACKEND=skia ^
+          -DSKIA_DIR="%CD%\..\skia" ^
+          -DSKIA_LIBRARY_DIR="%CD%\..\skia\out\Release-x64" ^
+          -DSKIA_LIBRARY="%CD%\..\skia\out\Release-x64\skia.lib" ^
+          ..
+
         ninja aseprite
-        
+
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
