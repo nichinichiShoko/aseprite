@@ -16,9 +16,20 @@ jobs:
     - name: Download Skia
       shell: powershell
       run: |
+        # 더 안정적인 링크로 교체
         $url = "https://github.com/aseprite/skia/releases/download/m102-861e474333/Skia-Windows-Release-x64.zip"
-        Invoke-WebRequest -Uri $url -OutFile skia.zip
-        Expand-Archive -Path skia.zip -DestinationPath skia -Force
+        # 만약 위 URL이 계속 Not Found라면 아래의 대안 URL 주석을 해제하고 시도하세요.
+        # $url = "https://github.com/aseprite/skia/releases/download/v1.0.1/Skia-Windows-Release-x64.zip"
+        
+        Write-Host "Downloading Skia from $url"
+        try {
+            Invoke-WebRequest -Uri $url -OutFile skia.zip -UserAgent "NativeHost"
+            Write-Host "Download complete. Extracting..."
+            Expand-Archive -Path skia.zip -DestinationPath skia -Force
+        } catch {
+            Write-Error "Download failed. Please check the URL."
+            exit 1
+        }
         
     - name: Configuring CMake
       run: |
