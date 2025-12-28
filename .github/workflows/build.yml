@@ -16,8 +16,8 @@ jobs:
     - name: Download Skia
       shell: powershell
       run: |
-        $url = "https://github.com/aseprite/skia/releases/download/m124-08a5439a6b/Skia-Windows-Release-x64.zip"
-        
+        # 최신 안정화된 Skia 링크 사용
+        $url = "https://github.com/aseprite/skia/releases/download/m102-861e474333/Skia-Windows-Release-x64.zip"
         Write-Host "Downloading Skia from $url"
         try {
             Invoke-WebRequest -Uri $url -OutFile skia.zip -UserAgent "NativeHost"
@@ -29,20 +29,17 @@ jobs:
         }
         
     - name: Configuring CMake
+      shell: pwsh
       run: |
         mkdir build
         cd build
-        cmake -G Ninja `
-          -DCMAKE_BUILD_TYPE=Release `
-          -DLAF_BACKEND=skia `
-          -DSKIA_DIR=../skia `
-          -DSKIA_LIBRARY_DIR=../skia/out/Release-x64 `
-          -DSKIA_LIBRARY=../skia/out/Release-x64/skia.lib `
-          ..
+        # 모든 경로를 한 줄로 이어 붙여서 경로 유실 방지
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DLAF_BACKEND=skia -DSKIA_DIR="$pwd/../skia" -DSKIA_LIBRARY_DIR="$pwd/../skia/out/Release-x64" -DSKIA_LIBRARY="$pwd/../skia/out/Release-x64/skia.lib" ..
         
     - name: Compiling
       run: |
         cd build
+        # 가상 머신의 성능을 고려하여 빌드 실행
         ninja aseprite
         
     - name: Upload Artifact
