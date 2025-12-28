@@ -17,7 +17,7 @@ jobs:
       shell: powershell
       run: |
         # 최신 안정화된 Skia 링크 사용
-        $url = "https://github.com/aseprite/skia/releases/download/m102-861e474333/Skia-Windows-Release-x64.zip"
+        $url = "https://github.com/aseprite/skia/releases/download/m124-08a5439a6b/Skia-Windows-Release-x64.zip"
         Write-Host "Downloading Skia from $url"
         try {
             Invoke-WebRequest -Uri $url -OutFile skia.zip -UserAgent "NativeHost"
