@@ -16,7 +16,7 @@ jobs:
     - name: Download Skia
       run: |
         curl -L -o skia.zip https://github.com/aseprite/skia/releases/download/m102-861e474333/Skia-Windows-Release-x64.zip
-        expand-archive skia.zip -destinationpath skia
+        powershell Expand-Archive skia.zip -DestinationPath skia
         
     - name: Configuring CMake
       run: |
