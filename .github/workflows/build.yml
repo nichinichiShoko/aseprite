@@ -14,9 +14,11 @@ jobs:
         choco install ninja
         
     - name: Download Skia
+      shell: powershell
       run: |
-        curl -L -o skia.zip https://github.com/aseprite/skia/releases/download/m102-861e474333/Skia-Windows-Release-x64.zip
-        powershell Expand-Archive skia.zip -DestinationPath skia
+        $url = "https://github.com/aseprite/skia/releases/download/m102-861e474333/Skia-Windows-Release-x64.zip"
+        Invoke-WebRequest -Uri $url -OutFile skia.zip
+        Expand-Archive -Path skia.zip -DestinationPath skia -Force
         
     - name: Configuring CMake
       run: |
